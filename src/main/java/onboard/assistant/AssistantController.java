@@ -32,9 +32,9 @@ public class AssistantController {
     @Property(name = "bot.api.token")
     private String slackApiToken;
 
-    MongoClient mongoClient;
-    AssistantService assistantService;
-    JsonParser parser = new JsonParser();
+    private MongoClient mongoClient;
+    private AssistantService assistantService;
+    private JsonParser parser = new JsonParser();
 
     public AssistantController(MongoClient mongoClient, AssistantService assistantService) {
         this.mongoClient = mongoClient;
@@ -43,16 +43,10 @@ public class AssistantController {
 
     @Post("/assistant")
     public HttpResponse index(@Body String body) {
-        JsonObject json = parser.parse(body).getAsJsonObject();
-
-        if (json.get("challenge") != null) {
-            String challenge = json.get("challenge").getAsString();
-            String jsonResponse = new Gson().toJson("challenge: " + challenge);
-            return HttpResponse.status(OK).body(jsonResponse);
-        }
+        verifyChallengeRequest(body);
 
         IncomingMessage message = new Gson().fromJson(body, IncomingMessage.class);
-        ApiToken token = ApiToken.of(slackApiToken); //TODO: add token here but refactor into .yml file
+        ApiToken token = ApiToken.of(slackApiToken);
 
         if (message.event.type.equals("member_joined_channel")) {
             Slack slack = Slack.getInstance();
@@ -63,6 +57,7 @@ public class AssistantController {
                 ChannelsListResponse channelsResponse = slack.methods().channelsList(
                         ChannelsListRequest.builder().token(token.getValue()).build());
 
+                //TODO: change the channel id get to point to general
                 Channel channel = channelsResponse.getChannels().stream()
                         .filter(c -> c.getId().equals(message.event.channel)).findFirst().get();
 
@@ -82,14 +77,23 @@ public class AssistantController {
                                 .attachments(attachments)
                                 .build());
                 LOG.info("Response message sent to the user at channel: " + channel.getName());
-                //TODO: after removing the above section of code tie the post message to the general channel
-                // TODO: within slack itself and
-                //TODO: remove the code comments
+                //TODO: Change the channel to point to general, this will activate
+                //TODO: when a new user joins
             } catch (SlackApiException | IOException ex) {
                 LOG.info("An exception occurred: " + ex.getMessage());
             }
         }
         return HttpResponse.status(OK);
+    }
+
+    private HttpResponse verifyChallengeRequest(String body) {
+        JsonObject json = parser.parse(body).getAsJsonObject();
+        if (json.get("challenge") != null) {
+            String challenge = json.get("challenge").getAsString();
+            String jsonResponse = new Gson().toJson("challenge: " + challenge);
+            return HttpResponse.status(OK).body(jsonResponse);
+        }
+        return null;
     }
 
     @Post("/assistant/attachment")
