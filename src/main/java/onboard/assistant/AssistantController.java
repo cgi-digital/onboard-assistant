@@ -19,11 +19,14 @@ import io.micronaut.http.annotation.Post;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static io.micronaut.http.HttpStatus.OK;
 
 @Controller
 public class AssistantController {
+
+    private static final Logger LOG = Logger.getLogger("Assistant Controller Logger");
 
     MongoClient mongoClient;
     AssistantService assistantService;
@@ -34,9 +37,8 @@ public class AssistantController {
         this.assistantService = assistantService;
     }
 
-
     @Post("/assistant")
-    public HttpResponse index(@Body String body) throws IOException, SlackApiException {
+    public HttpResponse index(@Body String body) {
         JsonObject json = parser.parse(body).getAsJsonObject();
 
         if (json.get("challenge") != null) {
@@ -51,37 +53,37 @@ public class AssistantController {
         if (message.event.type.equals("member_joined_channel")) {
             Slack slack = Slack.getInstance();
 
-            ChannelsListResponse channelsResponse = slack.methods().channelsList(
-                    ChannelsListRequest.builder().token(token.getValue()).build());
+            try {
 
-            Channel softwareEngineering = channelsResponse.getChannels().stream()
-                    .filter(c -> c.getName().equals("software-engineering")).findFirst().get();
+                LOG.info("New user joined, attempting to respond");
+                ChannelsListResponse channelsResponse = slack.methods().channelsList(
+                        ChannelsListRequest.builder().token(token.getValue()).build());
 
-            List attachments = assistantService.getAttachments();
+                Channel channel = channelsResponse.getChannels().stream()
+                        .filter(c -> c.getId().equals(message.event.channel)).findFirst().get();
 
-            //TODO: Remove this section of code after development
+                List attachments = assistantService.getAttachments();
 
-            Channel channel = channelsResponse.getChannels().stream()
-                    .filter(c -> c.getId().equals(message.event.channel)).findFirst().get();
+                String introduction = "Hi <@" + message.event.user + "> I'm the onboarding assistant for CGI,\n " +
+                        "I'm here to make the process easier for you\n" +
+                        "You have lots to do over the next few days\n" +
+                        "Shall we get started";
 
-            String introduction = "Hi <@" + message.event.user + "> I'm the onboarding assistant for CGI,\n " +
-                    "I'm here to make the process easier for you\n" +
-                    "You have lots to do over the next few days\n" +
-                    "Shall we get started";
-
-            slack.methods().chatPostMessage(
-                    ChatPostMessageRequest.builder()
-                            .token(token.getValue())
-                            .channel(channel.getId())
-                            .text(introduction)
-                            .mrkdwn(true)
-                            .attachments(attachments)
-                            .build());
-
-
-            //TODO: after removing the above section of code tie the post message to the general channel and
-            //TODO: remove the code comments
-
+                slack.methods().chatPostMessage(
+                        ChatPostMessageRequest.builder()
+                                .token(token.getValue())
+                                .channel(channel.getId())
+                                .text(introduction)
+                                .mrkdwn(true)
+                                .attachments(attachments)
+                                .build());
+                LOG.info("Response message sent to the user at channel: " + channel.getName());
+                //TODO: after removing the above section of code tie the post message to the general channel
+                // TODO: within slack itself and
+                //TODO: remove the code comments
+            } catch (SlackApiException | IOException ex) {
+                LOG.info("An exception occurred: " + ex.getMessage());
+            }
         }
         return HttpResponse.status(OK);
     }
