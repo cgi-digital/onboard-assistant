@@ -46,7 +46,7 @@ public class AssistantController {
         }
 
         IncomingMessage message = new Gson().fromJson(body, IncomingMessage.class);
-        ApiToken token = ApiToken.of("xoxb-379873439939-527270329015-mIc7AHUuS7DUffWwoRbJHuqf");
+        ApiToken token = ApiToken.of(null); //TODO: add token here but refactor into .yml file
 
         if (message.event.type.equals("member_joined_channel")) {
             Slack slack = Slack.getInstance();
