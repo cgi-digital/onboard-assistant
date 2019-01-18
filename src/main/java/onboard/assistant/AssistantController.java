@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mongodb.reactivestreams.client.MongoClient;
+import io.micronaut.context.annotation.Property;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
@@ -27,6 +28,9 @@ import static io.micronaut.http.HttpStatus.OK;
 public class AssistantController {
 
     private static final Logger LOG = Logger.getLogger("Assistant Controller Logger");
+
+    @Property(name = "bot.api.token")
+    private String slackApiToken;
 
     MongoClient mongoClient;
     AssistantService assistantService;
@@ -48,7 +52,7 @@ public class AssistantController {
         }
 
         IncomingMessage message = new Gson().fromJson(body, IncomingMessage.class);
-        ApiToken token = ApiToken.of(null); //TODO: add token here but refactor into .yml file
+        ApiToken token = ApiToken.of(slackApiToken); //TODO: add token here but refactor into .yml file
 
         if (message.event.type.equals("member_joined_channel")) {
             Slack slack = Slack.getInstance();
