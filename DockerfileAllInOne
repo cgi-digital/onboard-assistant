@@ -1,9 +1,10 @@
 FROM maven:3.6.0-jdk-8-alpine as builder
 COPY  . /root/app/
+COPY /src/main/resources/settings.xml /usr/share/maven/conf/settings.xml
 WORKDIR /root/app
 RUN mvn install
 
-FROM oracle/graalvm-ce:1.0.0-rc8 as graalvm
+FROM oracle/graalvm-ce:1.0.0-rc11 as graalvm
 COPY --from=builder /root/app/ /home/app/
 WORKDIR /home/app
 RUN java -cp target/onboard-assistant-0.1.jar \
@@ -24,7 +25,7 @@ RUN native-image --no-server \
 
 
 FROM frolvlad/alpine-glibc
-EXPOSE 8080
+EXPOSE 9000
 COPY --from=graalvm /home/app/onboard-assistant .
 ENTRYPOINT ["./onboard-assistant"]
 

@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mongodb.reactivestreams.client.MongoClient;
+import io.micronaut.configuration.mongo.reactive.condition.RequiresMongo;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
@@ -24,6 +25,7 @@ import java.util.logging.Logger;
 
 import static io.micronaut.http.HttpStatus.OK;
 
+@RequiresMongo
 @Controller
 public class AssistantController {
 
@@ -43,7 +45,13 @@ public class AssistantController {
 
     @Post("/assistant")
     public HttpResponse index(@Body String body) {
-        verifyChallengeRequest(body);
+
+        JsonObject json = parser.parse(body).getAsJsonObject();
+        if (json.get("challenge") != null) {
+            String challenge = json.get("challenge").getAsString();
+            String jsonResponse = new Gson().toJson("challenge: " + challenge);
+            return HttpResponse.status(OK).body(jsonResponse);
+        }
 
         IncomingMessage message = new Gson().fromJson(body, IncomingMessage.class);
         ApiToken token = ApiToken.of(slackApiToken);
@@ -84,16 +92,6 @@ public class AssistantController {
             }
         }
         return HttpResponse.status(OK);
-    }
-
-    private HttpResponse verifyChallengeRequest(String body) {
-        JsonObject json = parser.parse(body).getAsJsonObject();
-        if (json.get("challenge") != null) {
-            String challenge = json.get("challenge").getAsString();
-            String jsonResponse = new Gson().toJson("challenge: " + challenge);
-            return HttpResponse.status(OK).body(jsonResponse);
-        }
-        return null;
     }
 
     @Post("/assistant/attachment")
