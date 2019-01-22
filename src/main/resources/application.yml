@@ -12,4 +12,4 @@ mongodb:
 ---
 bot:
   api:
-    token:
+    token: "${OAUTH_TOKEN}"

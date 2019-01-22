@@ -4,7 +4,7 @@
   <artifactId>onboard-assistant</artifactId>
   <version>0.1</version>
   <properties>
-    <micronaut.version>1.0.1</micronaut.version>
+    <micronaut.version>1.0.3</micronaut.version>
     <jdk.version>1.8</jdk.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <exec.mainClass>onboard.assistant.Application</exec.mainClass>
@@ -32,6 +32,7 @@
       <groupId>com.github.seratch</groupId>
       <artifactId>jslack</artifactId>
       <version>1.1.6</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.micronaut</groupId>
