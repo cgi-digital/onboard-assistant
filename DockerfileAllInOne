@@ -12,6 +12,7 @@ RUN java -cp target/onboard-assistant-0.1.jar \
             reflect.json
 RUN native-image --no-server \
                  --class-path target/onboard-assistant-0.1.jar \
+                 --allow-incomplete-classpath \
     			 -H:ReflectionConfigurationFiles=/home/app/reflect.json \
     			 -H:EnableURLProtocols=http \
     			 -H:IncludeResources='logback.xml|application.yml|META-INF/services/*.*' \

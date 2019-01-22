@@ -1,4 +1,5 @@
 FROM anapsix/alpine-java
+#FROM oracle/graalvm-ce:1.0.0-rc11
 EXPOSE 9000
 COPY target/onboard-assistant-*.jar onboard-assistant.jar
 #ADD . target
@@ -14,7 +15,7 @@ COPY target/onboard-assistant-*.jar onboard-assistant.jar
 #             -H:+ReportUnsupportedElementsAtRuntime \
 #             -H:+AllowVMInspection \
 #             -H:-UseServiceLoaderFeature \
-#             --rerun-class-initialization-at-runtime='sun.security.jca.JCAUtil$CachedSecureRandomHolder,javax.net.ssl.SSLContext,com.github.seratch.jslack.Slack' \
+#             --rerun-class-initialization-at-runtime='sun.security.jca.JCAUtil$CachedSecureRandomHolder,javax.net.ssl.SSLContext' \
 #             --delay-class-initialization-to-runtime=io.netty.handler.codec.http.HttpObjectEncoder,io.netty.handler.codec.http.websocketx.WebSocket00FrameEncoder,io.netty.handler.ssl.util.ThreadLocalInsecureRandom,com.sun.jndi.dns.DnsClient
 #ENTRYPOINT ["./onboard-assistant"]
 

@@ -57,7 +57,7 @@ public class AssistantController {
         ApiToken token = ApiToken.of(slackApiToken);
 
         if (message.event.type.equals("member_joined_channel")) {
-            Slack slack = Slack.getInstance();
+            Slack slack = new Slack();
 
             try {
 
