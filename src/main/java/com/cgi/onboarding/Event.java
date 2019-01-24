@@ -1,4 +1,4 @@
-package onboard.assistant;
+package com.cgi.onboarding;
 
 public final class Event {
 
