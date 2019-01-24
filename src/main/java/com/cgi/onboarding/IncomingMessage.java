@@ -1,4 +1,6 @@
-package onboard.assistant;
+package com.cgi.onboarding;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 public final class IncomingMessage {
 
@@ -10,6 +12,9 @@ public final class IncomingMessage {
     public String event_id;
     public int event_time;
     public String[] authed_users;
+
+    @JsonCreator
+    public IncomingMessage(){}
 
     public String getToken() {
         return token;

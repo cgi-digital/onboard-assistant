@@ -1,5 +1,0 @@
-profile: service
-defaultPackage: onboard.assistant
----
-testFramework: junit
-sourceLanguage: java
