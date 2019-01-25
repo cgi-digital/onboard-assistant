@@ -12,6 +12,7 @@ import com.mongodb.Block;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.bson.Document;
@@ -33,6 +34,11 @@ public class OnboardAssistantApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(OnboardAssistantApplication.class, args);
+	}
+
+	@Builder
+	static class ChallengeHandler {
+		String challenge;
 	}
 
 	@Slf4j
@@ -60,8 +66,9 @@ public class OnboardAssistantApplication {
 			val json = parser.parse(body).getAsJsonObject();
 			if (json.get(CHALLENGE) != null) {
 				log.info("Incoming challenge request responding with challenge");
-				val challenge = json.get(CHALLENGE).getAsString();
-				val jsonResponse = gson.toJson(CHALLENGE + ": " + challenge);
+				val challenge = ChallengeHandler.builder();
+				challenge.challenge = json.get(CHALLENGE).getAsString();
+				val jsonResponse = gson.toJson(challenge);
 				return new ResponseEntity<>(jsonResponse, OK);
 			}
 
