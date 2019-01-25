@@ -42,7 +42,6 @@ public class OnboardAssistantApplication {
 		public static final String CHALLENGE = "challenge";
 
 		private String slackApiToken;
-		private String mongoUri;
 		private Gson gson;
 		private JsonParser parser;
 		private MongoClient mongoClient;
@@ -52,7 +51,6 @@ public class OnboardAssistantApplication {
 			this.slackApiToken = slackApiToken;
 			gson = new Gson();
 			parser = new JsonParser();
-			this.mongoUri = mongoUri;
 			mongoClient = MongoClients.create(mongoUri);
 		}
 
