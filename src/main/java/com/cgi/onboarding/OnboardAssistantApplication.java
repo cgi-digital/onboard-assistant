@@ -13,6 +13,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -46,44 +47,44 @@ public class OnboardAssistantApplication {
 		private JsonParser parser;
 		private MongoClient mongoClient;
 
-		public AssistantController(@Value("${spring.data.mongodb.uri}") String mongUri,
+		public AssistantController(@Value("${spring.data.mongodb.uri}") String mongoUri,
 								   @Value("${slack.auth.token}") String slackApiToken) {
 			this.slackApiToken = slackApiToken;
 			gson = new Gson();
 			parser = new JsonParser();
-			this.mongoUri = mongUri;
-			mongoClient = MongoClients.create(mongUri);
+			this.mongoUri = mongoUri;
+			mongoClient = MongoClients.create(mongoUri);
 		}
 
 		@PostMapping("/assistant")
 		public ResponseEntity index(@RequestBody String body) {
 
-			var json = parser.parse(body).getAsJsonObject();
+			val json = parser.parse(body).getAsJsonObject();
 			if (json.get(CHALLENGE) != null) {
 				log.info("Incoming challenge request responding with challenge");
-				var challenge = json.get(CHALLENGE).getAsString();
-				var jsonResponse = gson.toJson(CHALLENGE + ": " + challenge);
+				val challenge = json.get(CHALLENGE).getAsString();
+				val jsonResponse = gson.toJson(CHALLENGE + ": " + challenge);
 				return new ResponseEntity<>(jsonResponse, OK);
 			}
 
-			var message = gson.fromJson(body, IncomingMessage.class);
-			var token = ApiToken.of(slackApiToken);
+			val message = gson.fromJson(body, IncomingMessage.class);
+			val token = ApiToken.of(slackApiToken);
 
 			if (message.event.type.equals("member_joined_channel")) {
-				var slack = Slack.getInstance();
+				val slack = Slack.getInstance();
 
 				try {
 
 					log.info("New user joined, attempting to respond to{}", message.event.user);
-					var channelsResponse = slack.methods().channelsList(
+					val channelsResponse = slack.methods().channelsList(
 							ChannelsListRequest.builder().token(token.getValue()).build());
 
 					//TODO: change the channel id get to point to general
-					var channel = channelsResponse.getChannels().stream()
+					val channel = channelsResponse.getChannels().stream()
 							.filter(c -> c.getId().equals(message.event.channel)).findFirst().get();
 
 					log.info("Have Channel to respond to, getting all required attachments");
-					var attachments = new ArrayList<Attachment>();
+					val attachments = new ArrayList<Attachment>();
 					getCollection()
 							.find().forEach((Block<Document>) document -> {
 						Attachment attachment = gson.fromJson(document.toJson(), Attachment.class);
@@ -91,7 +92,7 @@ public class OnboardAssistantApplication {
 					});
 
 					log.info("Have a list of attachments sending the response");
-					var introduction = "Hi <@" + message.event.user + "> I'm the onboarding assistant for CGI,\n " +
+					val introduction = "Hi <@" + message.event.user + "> I'm the onboarding assistant for CGI,\n " +
 							"I'm here to make the process easier for you\n" +
 							"You have lots to do over the next few days\n" +
 							"Shall we get started";
@@ -117,7 +118,7 @@ public class OnboardAssistantApplication {
 		@PostMapping("/assistant/attachment")
 		public ResponseEntity createAttachment(@RequestBody Attachment attachment) {
 			log.info("Storing a new attachment object {}", attachment);
-			var document = Document.parse(gson.toJson(attachment));
+			val document = Document.parse(gson.toJson(attachment));
 			getCollection().insertOne(document);
 			return new ResponseEntity(OK);
 		}
