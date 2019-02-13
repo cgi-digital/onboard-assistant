@@ -1,5 +1,5 @@
 FROM anapsix/alpine-java
-MAINTAINER James Loveday <james.lovveday@cgi.com>
+MAINTAINER James Loveday <james.loveday@cgi.com>
 EXPOSE 9000
 COPY target/onboard-assistant-*.jar onboard-assistant.jar
 
